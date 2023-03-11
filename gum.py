@@ -1,5 +1,4 @@
-import numpy as np
-from toolbox import flatten, inv, log_gaussian, rand, randn, tensor, transpose, unflatten, zeros
+from toolbox import flatten, inv, log_gaussian, randn, tensor, transpose, unflatten, zeros
 
 class GUM:
     def __init__(self, a, b, c, eta_, alpha_, beta_, requires_grad=False):
@@ -141,4 +140,23 @@ class DGUM(GUM):
     def theta(self):
         return self.a, self.b, self.c, self.eta_, self.beta_
 
+class RNN(DGUM):
+    def __init__(self, a, b, c, beta_, requires_grad=False):
+        super().__init__(a, b, c, tensor([]), beta_, requires_grad=requires_grad)
 
+    @property
+    def eta(self):
+        return self.c @ transpose(self.c)
+
+    @property
+    def eta_(self):
+        return flatten(self.eta)
+
+    @property
+    def theta(self):
+        return self.a, self.b, self.c, self.beta_
+
+    def __str__(self):
+        s = super().__str__()
+        s += " ; Note: cc^T={0} (=eta)\n".format(self.c @ transpose(self.c))
+        return s
