@@ -1,3 +1,5 @@
+import numpy as np
+
 from toolbox import flatten, inv, log_gaussian, randn, tensor, transpose, unflatten, zeros
 
 class GUM:
@@ -99,7 +101,7 @@ class GUM:
         # Initialisation
         mu_s = zeros((len(beta), 1))
         sigma_s = beta + b @ eta @ transpose(b)
-        mu_ss = zeros((len(alpha), 1))
+        mu_ss = zeros((len(eta), 1))
         sigma_ss = eta
 
         L = log_gaussian(x[0], mu_s, sigma_s)
@@ -107,6 +109,11 @@ class GUM:
         # Recursion
         for s in range(1, len(x)):
             # Eq. 86
+
+            # print("b     :{0},\na     :{1},\nmu_ss :{2},\nc     :{3},\nx_s-1 :{4}\n\n".format(
+            #     b.size(), a.size(), mu_ss.size(), c.size(), x[s-1].size()
+            # ))
+
             mu_s = b @ (a @ mu_ss + c @ x[s - 1])
             sigma_s = beta + b @ (alpha + a @ sigma_ss @ transpose(a)) @ transpose(b)
 
@@ -125,7 +132,8 @@ class GUM:
 class HMM(GUM):
     def __init__(self, a, b, eta_, alpha_, beta_, requires_grad=False):
         super().__init__(a, b, tensor([]), eta_, alpha_, beta_, requires_grad=requires_grad)
-        self.m_c = zeros((len(alpha_), 1))
+        n = int((-1 + np.sqrt(1+8*len(alpha_)))/2)
+        self.m_c = zeros((n, 1))
 
     @property
     def theta(self):
@@ -143,6 +151,8 @@ class DGUM(GUM):
 class RNN(DGUM):
     def __init__(self, a, b, c, beta_, requires_grad=False):
         super().__init__(a, b, c, tensor([]), beta_, requires_grad=requires_grad)
+        n = c.size()[0]
+        self.m_alpha_ = tensor([0 for _ in range(int(n * (n+1) / 2))])
 
     @property
     def eta(self):

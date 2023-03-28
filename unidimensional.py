@@ -110,20 +110,23 @@ def sample_AB(model=None):
         else:
             B = A * (2 * A**2 - 1)
     elif model == "hmm+rnn":
-        if np.abs(A) <= 1 / np.sqrt(2):
-            choice = np.random.choice(2)
-            if choice == 0:
-                B = 0
-            else:
-                B = A
-        else:
-            choice = np.random.choice(3)
-            if choice == 0:
-                B = 0
-            elif choice == 1:
-                B = A
-            else:
-                B = A * (2 * A ** 2 - 1)
+        # Let's jump directly to the interesting case
+        A = rand(1 / np.sqrt(2), 1)
+        B = A * (2 * A ** 2 - 1)
+        # if np.abs(A) <= 1 / np.sqrt(2):
+        #     choice = np.random.choice(2)
+        #     if choice == 0:
+        #         B = 0
+        #     else:
+        #         B = A
+        # else:
+        #     choice = np.random.choice(3)
+        #     if choice == 0:
+        #         B = 0
+        #     elif choice == 1:
+        #         B = A
+        #     else:
+        #         B = A * (2 * A ** 2 - 1)
     else:
         B = rand((A - 1) / 2, (A + 1) / 2)
     return A, B
